@@ -25,7 +25,7 @@ public:
           Var xi("xi"), yi("yi"), xii("xii"), yii("yii"), xt("xt"), yt("yt");
           RVar ki("ki"); // xii, yii;
           matrix_mul.compute_root().gpu_tile(x, y, xi, yi, 16, 16);
-          matrix_mul.update().tensor_core(input_a, input_b);
+          matrix_mul.update().tensor_core(input_a, "row", input_b, "col");
           matrix_mul.bound(x, 0, matrix_size).bound(y, 0, matrix_size);
 
         } else {

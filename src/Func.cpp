@@ -1606,7 +1606,8 @@ Stage &Stage::rename(VarOrRVar old_var, VarOrRVar new_var) {
   return *this;
 }
 
-Stage &Stage::tensor_core(const Parameter &paramA, const Parameter &paramB) {
+Stage &Stage::tensor_core(const Parameter &paramA, const string &layoutA,
+                          const Parameter &paramB, const string &layoutB) {
   vector<ReductionVariable> &rvars = definition.schedule().rvars();
 
   vector<Expr> &args = definition.args();
@@ -1658,8 +1659,8 @@ Stage &Stage::tensor_core(const Parameter &paramA, const Parameter &paramB) {
   gpu_threads(threadidx);
   gpu_blocks(blockidx);
 
-  TensorOpDirective tensor_mac = {function.name(),
-                                  {paramA.name(), paramB.name()}};
+  TensorOpDirective tensor_mac = {
+      function.name(), {paramA.name(), paramB.name(), layoutA, layoutB}};
   definition.schedule().tensorOp() = tensor_mac;
   std::cout << "TN MAC " << function.definition().schedule().tensorOp().name
             << std::endl;
@@ -2271,9 +2272,11 @@ Func &Func::allow_race_conditions() {
   return *this;
 }
 
-Func &Func::tensor_core(const Parameter &paramA, const Parameter &paramB) {
+Func &Func::tensor_core(const Parameter &paramA, const std::string &layoutA,
+                        const Parameter &paramB, const std::string &layoutB) {
   invalidate_cache();
-  Stage(func, func.definition(), 0).tensor_core(paramA, paramB);
+  Stage(func, func.definition(), 0)
+      .tensor_core(paramA, layoutA, paramB, layoutB);
   return *this;
 }
 

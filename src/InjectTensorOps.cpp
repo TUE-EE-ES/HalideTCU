@@ -287,6 +287,8 @@ class InjectTensorBlocks : public IRMutator {
       arguments.push_back(exLSA.get_arg(4));
       arguments.push_back(exLSA.get_arg(0));
       arguments.push_back(exLSA.get_arg(2));
+      arguments.push_back(Expr(tensorOp.args[2]));
+      arguments.push_back(Expr(tensorOp.args[3]));
       std::vector<Type> typez;
       for (int i = 0; i < 4; i++) {
         typez.push_back(exLSA.get_type(i));

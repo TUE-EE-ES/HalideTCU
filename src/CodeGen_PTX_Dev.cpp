@@ -233,11 +233,17 @@ void CodeGen_PTX_Dev::visit(const Call *op) {
     if (can_prove(op->args[0] == 0)) {
       // std::cout<<"load A "<<std::endl;
       fname = "fragment_a" + get_expr_str(op->args[4]);
-      loadintr = mma_load_intrinsic(op->type, 16, 16, 16, a, row);
+      if (get_expr_str(op->args[6]) == "row")
+        loadintr = mma_load_intrinsic(op->type, 16, 16, 16, a, row);
+      else if (get_expr_str(op->args[6]) == "col")
+        loadintr = mma_load_intrinsic(op->type, 16, 16, 16, a, col);
 
     } else if (can_prove(op->args[0] == 1)) {
       fname = "fragment_b" + get_expr_str(op->args[5]);
-      loadintr = mma_load_intrinsic(op->type, 16, 16, 16, b, col);
+      if (get_expr_str(op->args[6]) == "row")
+        loadintr = mma_load_intrinsic(op->type, 16, 16, 16, b, row);
+      else if (get_expr_str(op->args[6]) == "col")
+        loadintr = mma_load_intrinsic(op->type, 16, 16, 16, b, col);
     } else if (can_prove(op->args[0] == 2)) {
       fname = "fragment_c";
       loadintr = mma_load_intrinsic(op->type, 16, 16, 16, c, row);
@@ -305,7 +311,19 @@ void CodeGen_PTX_Dev::visit(const Call *op) {
       ;
     }
     llvm::Function *fnM;
-    string mmacintr = mma_mac_intrinsic(op->type, 16, 16, 16, row, col);
+    string mmacintr;
+    if (get_expr_str(op->args[2]) == "row") {
+      if (get_expr_str(op->args[3]) == "col")
+        mmacintr = mma_mac_intrinsic(op->type, 16, 16, 16, row, col);
+      else if (get_expr_str(op->args[3]) == "row")
+        mmacintr = mma_mac_intrinsic(op->type, 16, 16, 16, row, row);
+    } else if (get_expr_str(op->args[2]) == "col") {
+      if (get_expr_str(op->args[3]) == "col")
+        mmacintr = mma_mac_intrinsic(op->type, 16, 16, 16, col, col);
+      else if (get_expr_str(op->args[3]) == "row")
+        mmacintr = mma_mac_intrinsic(op->type, 16, 16, 16, col, row);
+    }
+
     fnM = module->getFunction(mmacintr);
     internal_assert(fnM) << "Could not find MMA intrinsic "
                          << "\n";

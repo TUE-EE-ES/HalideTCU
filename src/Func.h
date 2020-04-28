@@ -426,9 +426,14 @@ public:
                   Expr z_size, TailStrategy tail = TailStrategy::Auto,
                   DeviceAPI device_api = DeviceAPI::Default_GPU);
   Stage &tensor_core(const Internal::Parameter &paramA,
-                     const Internal::Parameter &paramB);
-  template <typename T> Stage &tensor_core(const T &imageA, const T &imageB) {
-    return tensor_core(imageA.parameter(), imageB.parameter());
+                     const std::string &layoutA,
+                     const Internal::Parameter &paramB,
+                     const std::string &layoutB);
+  template <typename T>
+  Stage &tensor_core(const T &imageA, const std::string &layoutA,
+                     const T &imageB, const std::string &layoutB) {
+    return tensor_core(imageA.parameter(), layoutA, imageB.parameter(),
+                       layoutB);
   }
   Stage &allow_race_conditions();
   Stage &atomic(bool override_associativity_test = false);
@@ -1581,9 +1586,14 @@ public:
   Func &allow_race_conditions();
 
   Func &tensor_core(const Internal::Parameter &paramA,
-                    const Internal::Parameter &paramB);
-  template <typename T> Func &tensor_core(const T &imageA, const T &imageB) {
-    return tensor_core(imageA.parameter(), imageB.parameter());
+                    const std::string &layoutA,
+                    const Internal::Parameter &paramB,
+                    const std::string &layoutB);
+  template <typename T>
+  Func &tensor_core(const T &imageA, const std::string &layoutA,
+                    const T &imageB, const std::string &layoutB) {
+    return tensor_core(imageA.parameter(), layoutA, imageB.parameter(),
+                       layoutB);
   }
 
   /** Issue atomic updates for this Func. This allows parallelization

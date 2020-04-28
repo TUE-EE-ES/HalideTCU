@@ -35,8 +35,8 @@ Stmt make_equiv_body(const std::vector<Expr> &targs,
                        // std::vector<Expr>(), Call::Extern));;
   Expr thx = targs[3]; //(Call::make(Int(32), "llvm.nvvm.read.ptx.sreg.tid.x",
                        // std::vector<Expr>(), Call::Extern));;
-  std::cout << "ROW COL A " << targs[9] << std::endl;
-  std::cout << "ROW COL B " << targs[10] << std::endl;
+  std::cout<<"ROW COL A "<<targs[9]<<std::endl;
+  std::cout<<"ROW COL B "<<targs[10]<<std::endl;
   Expr WARP_SIZE = (make_const(Int(32), 32));
   Expr WARPS_PER_BLOCK = make_const(Int(32), 8);
   Expr THREADS_PER_BLOCK = WARP_SIZE * WARPS_PER_BLOCK;
@@ -216,19 +216,18 @@ Stmt make_equiv_body(const std::vector<Expr> &targs,
       Call::make(types[1], Call::mma_load, args_lb, Call::Intrinsic));
   std::cout << "make Call mma\n";
   // now call mma_mac
-  Stmt mma = Evaluate::make(
-      Call::make(types[2], Call::mma_operation,
-                 {k_step_i, k_step_j, targs[9], targs[10]}, Call::Intrinsic));
+  Stmt mma = Evaluate::make(Call::make(types[2], Call::mma_operation,
+                                       {k_step_i, k_step_j,targs[9],targs[10]}, Call::Intrinsic));
   Stmt k_step_j_body = Block::make({loadb, mma});
   Stmt k_step_j_loop =
-      For::make(kstep_j, make_zero(Int(32)), WARP_ROW_TILES, ForType::Unrolled,
-                DeviceAPI::None, k_step_j_body);
+      For::make(kstep_j, make_zero(Int(32)), WARP_ROW_TILES,
+                ForType::Unrolled, DeviceAPI::None, k_step_j_body);
 
   // k step_ i loop ;
   Stmt k_step_i_body = Block::make({loada, k_step_j_loop});
   Stmt k_step_i_loop =
-      For::make(kstep_i, make_zero(Int(32)), WARP_COL_TILES, ForType::Unrolled,
-                DeviceAPI::None, k_step_i_body);
+      For::make(kstep_i, make_zero(Int(32)), WARP_COL_TILES,
+                ForType::Unrolled, DeviceAPI::None, k_step_i_body);
 
   // k_step body
   Stmt k_step_loop =
